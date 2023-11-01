@@ -12,6 +12,10 @@ exports.getallproducts = async (req, res) => {
             product
         });
     } catch (error) {
+        if (error.name === "CastError") {
+            const message = ` Resource not Found. Invalid: ${error.path}`;
+            return res.status(400).json({message});
+        }
         console.log("there is some internal server error", error);
         return res.status(500).json({
             success: false,
@@ -61,6 +65,10 @@ exports.updateproduct = async (req, res) => {
         });
 
     } catch (error) {
+        if (error.name === "CastError") {
+            const message = ` Resource not Found. Invalid: ${error.path}`;
+            return res.status(400).json({message});
+        }
         console.log("there is some internal server error", error);
         return res.status(500).json({
             success: false,
@@ -86,6 +94,10 @@ exports.deleteproduct = async (req, res) => {
             message: "product has been successfully Removed"
         });
     } catch (error) {
+        if (error.name === "CastError") {
+            const message = ` Resource not Found. Invalid: ${error.path}`;
+            return res.status(400).json({message});
+        }
         console.log("there is some internal server error", error);
         return res.status(500).json({
             success: false,
@@ -109,6 +121,10 @@ exports.detailproduct = async (req, res) => {
             product
         });
     } catch (error) {
+        if (error.name === "CastError") {
+            const message = ` Resource not Found. Invalid: ${error.path}`;
+            return res.status(400).json({message});
+        }
         console.log("there is some internal server error", error);
         return res.status(500).json({
             success: false,
