@@ -1,20 +1,29 @@
 // product model
-const Product = require('../models/productsModel')
+const Product = require('../models/productsModel');
+const ApiFeatures = require('../utils/apifeatures');
 let success = false;
 
 
 // controller to check all products
 exports.getallproducts = async (req, res) => {
     try {
-        const product = await Product.find();
+        const resultPerPage = 5;
+        const productCount = await Product.countDocuments();
+
+        const ApiFeature = new ApiFeatures(Product.find(), req.query)
+        .search()
+        .filter()
+        .pagination(resultPerPage);
+        const product = await ApiFeature.query;
         return res.status(200).json({
             success: true,
-            product
+            product,
+            productCount
         });
     } catch (error) {
         if (error.name === "CastError") {
             const message = ` Resource not Found. Invalid: ${error.path}`;
-            return res.status(400).json({message});
+            return res.status(400).json({ message });
         }
         console.log("there is some internal server error", error);
         return res.status(500).json({
@@ -27,7 +36,15 @@ exports.getallproducts = async (req, res) => {
 //controller to create a product -- only admin
 exports.createproduct = async (req, res) => {
     try {
+
         const productData = await req.body;
+        // validation check error handler
+        if (!productData.name || !productData.description || !productData.price || !productData.image.public_id || !productData.image.url || !productData.category) {
+            return res.status(400).json({
+                success: false,
+                message: "Please Provide Product's Full Deatils"
+            })
+        }
         const product = await Product.create(productData);
 
         return res.status(200).json({
@@ -67,7 +84,7 @@ exports.updateproduct = async (req, res) => {
     } catch (error) {
         if (error.name === "CastError") {
             const message = ` Resource not Found. Invalid: ${error.path}`;
-            return res.status(400).json({message});
+            return res.status(400).json({ message });
         }
         console.log("there is some internal server error", error);
         return res.status(500).json({
@@ -96,7 +113,7 @@ exports.deleteproduct = async (req, res) => {
     } catch (error) {
         if (error.name === "CastError") {
             const message = ` Resource not Found. Invalid: ${error.path}`;
-            return res.status(400).json({message});
+            return res.status(400).json({ message });
         }
         console.log("there is some internal server error", error);
         return res.status(500).json({
@@ -123,7 +140,7 @@ exports.detailproduct = async (req, res) => {
     } catch (error) {
         if (error.name === "CastError") {
             const message = ` Resource not Found. Invalid: ${error.path}`;
-            return res.status(400).json({message});
+            return res.status(400).json({ message });
         }
         console.log("there is some internal server error", error);
         return res.status(500).json({

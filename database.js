@@ -7,9 +7,10 @@ const mongoUrl = (process.env.DB_URI);// cannot use 'localhost' i.e.,('mongodb:/
 const connecttodb = () => {
     mongoose.connect(mongoUrl).then(() => {
         console.log('connection succesful');
-    }).catch((error) => {
-        console.log('connecton failed:', error)
-    })
+    }) //refer server.js as why this is comment out
+    // .catch((error) => {
+    //     console.log('connecton failed:', error)
+    // })
 }
 // connecttodb();
 module.exports = connecttodb;
