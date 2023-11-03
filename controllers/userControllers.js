@@ -1,12 +1,13 @@
 const Users = require('../models/userModel');
 const validator = require('validator');
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 
 // Register Or signup of user
 exports.signupUser = async (req, res) => {
     try {
         const { name, email, password } = req.body;
-
         // to get all data and handle error for missing data
         if (!name || !email || !password) {
             return res.status(404).json({
@@ -54,6 +55,44 @@ exports.signupUser = async (req, res) => {
         });
     } catch (error) {
         console.log("there is some internal server error", error);
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error"
+        });
+    }
+}
+
+// Login of user 
+exports.loginUser = async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        if (!email, !password) {
+            return res.status(404).json({
+                success: false,
+                message: "Please Provide Email and Password"
+            });
+        };
+        const user = await Users.findOne({ email }).select("+password");
+        if (!user) {
+            return res.status(401).json({
+                success: false,
+                message: "Invalid Email or Password"
+            });
+        };
+        const comparepassword = await bcrypt.compare(password, user.password);
+        if (!comparepassword) {
+            return res.status(401).json({
+                success: false,
+                message: "Enter Valid and Password"
+            });
+        };
+        const token = user.getJWTToken();
+        return res.status(200).json({
+            success: true,
+            token
+        })
+    } catch (error) {
+        console.log("there is some internal server error", error, error.message);
         return res.status(500).json({
             success: false,
             message: "Internal server error"
