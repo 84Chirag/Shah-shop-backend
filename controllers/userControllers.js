@@ -48,9 +48,16 @@ exports.signupUser = async (req, res) => {
             }
         });
 
+        const options = {
+            expires : new Date(
+                Date.now() + process.env.COOKIE_EXPIRE * 24 * 60 * 60 * 1000
+            ),
+            httpOnly : true,
+        };
         const token = user.getJWTToken();
-        return res.status(200).json({
+        return res.status(200).cookie("token",token,options).json({
             success: true,
+            user,
             token
         });
     } catch (error) {
@@ -86,11 +93,38 @@ exports.loginUser = async (req, res) => {
                 message: "Enter Valid and Password"
             });
         };
+        const options = {
+            expires : new Date(
+                Date.now() + process.env.COOKIE_EXPIRE * 24 * 60 * 60 * 1000
+            ),
+            httpOnly : true,
+        };
         const token = user.getJWTToken();
-        return res.status(200).json({
+        return res.status(200).cookie("token",token,options).json({
             success: true,
             token
         })
+    } catch (error) {
+        console.log("there is some internal server error", error, error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error"
+        });
+    }
+}
+
+
+// Logout of users
+exports.logout = async(req,res)=>{
+    try {
+        res.cookie("token",null,{
+            expires:new Date(Date.now()),
+            httpOnly:true
+        });
+        return res.status(200).json({
+            success:true,
+            message:"You Have Been Successfully Logged Out!"
+        });
     } catch (error) {
         console.log("there is some internal server error", error, error.message);
         return res.status(500).json({
