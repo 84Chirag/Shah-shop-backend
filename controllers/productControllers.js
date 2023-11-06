@@ -21,8 +21,24 @@ exports.getallproducts = async (req, res) => {
             productCount
         });
     } catch (error) {
+        // for cast Error
         if (error.name === "CastError") {
-            const message = ` Resource not Found. Invalid: ${error.path}`;
+            const message = `Resource not Found. Invalid: ${error.path}`;
+            return res.status(400).json({ message });
+        }
+        // mongoose duplicate key error
+        if (error.code === 11000) {
+            const message = `Duplicate ${Object.keys(error.keyValue)} Entered`;
+            return res.status(400).json({ message });
+        }
+        //  wrong jwt error
+        if (error.name === "JsonWebTokenError") {
+            const message = `Json Web Token Is Invalid, Try Again`;
+            return res.status(400).json({ message });
+        }
+        // for web token expired error
+        if (error.name === "TokenExpiredError") {
+            const message = `Json Web token is expired, try Again`;
             return res.status(400).json({ message });
         }
         console.log("there is some internal server error", error);
@@ -36,7 +52,8 @@ exports.getallproducts = async (req, res) => {
 //controller to create a product -- only admin
 exports.createproduct = async (req, res) => {
     try {
-
+        // setting user as user id check productmodel for reference
+        req.body.user = req.user.id
         const productData = await req.body;
         // validation check error handler
         if (!productData.name || !productData.description || !productData.price || !productData.image.public_id || !productData.image.url || !productData.category) {
@@ -82,8 +99,24 @@ exports.updateproduct = async (req, res) => {
         });
 
     } catch (error) {
+        // for cast Error
         if (error.name === "CastError") {
-            const message = ` Resource not Found. Invalid: ${error.path}`;
+            const message = `Resource not Found. Invalid: ${error.path}`;
+            return res.status(400).json({ message });
+        }
+        // mongoose duplicate key error
+        if (error.code === 11000) {
+            const message = `Duplicate ${Object.keys(error.keyValue)} Entered`;
+            return res.status(400).json({ message });
+        }
+        //  wrong jwt error
+        if (error.name === "JsonWebTokenError") {
+            const message = `Json Web Token Is Invalid, Try Again`;
+            return res.status(400).json({ message });
+        }
+        // for web token expired error
+        if (error.name === "TokenExpiredError") {
+            const message = `Json Web token is expired, try Again`;
             return res.status(400).json({ message });
         }
         console.log("there is some internal server error", error);
@@ -111,8 +144,24 @@ exports.deleteproduct = async (req, res) => {
             message: "product has been successfully Removed"
         });
     } catch (error) {
+        // for cast Error
         if (error.name === "CastError") {
-            const message = ` Resource not Found. Invalid: ${error.path}`;
+            const message = `Resource not Found. Invalid: ${error.path}`;
+            return res.status(400).json({ message });
+        }
+        // mongoose duplicate key error
+        if (error.code === 11000) {
+            const message = `Duplicate ${Object.keys(error.keyValue)} Entered`;
+            return res.status(400).json({ message });
+        }
+        //  wrong jwt error
+        if (error.name === "JsonWebTokenError") {
+            const message = `Json Web Token Is Invalid, Try Again`;
+            return res.status(400).json({ message });
+        }
+        // for web token expired error
+        if (error.name === "TokenExpiredError") {
+            const message = `Json Web token is expired, try Again`;
             return res.status(400).json({ message });
         }
         console.log("there is some internal server error", error);
@@ -138,8 +187,24 @@ exports.detailproduct = async (req, res) => {
             product
         });
     } catch (error) {
+        // for cast Error
         if (error.name === "CastError") {
-            const message = ` Resource not Found. Invalid: ${error.path}`;
+            const message = `Resource not Found. Invalid: ${error.path}`;
+            return res.status(400).json({ message });
+        }
+        // mongoose duplicate key error
+        if (error.code === 11000) {
+            const message = `Duplicate ${Object.keys(error.keyValue)} Entered`;
+            return res.status(400).json({ message });
+        }
+        //  wrong jwt error
+        if (error.name === "JsonWebTokenError") {
+            const message = `Json Web Token Is Invalid, Try Again`;
+            return res.status(400).json({ message });
+        }
+        // for web token expired error
+        if (error.name === "TokenExpiredError") {
+            const message = `Json Web token is expired, try Again`;
             return res.status(400).json({ message });
         }
         console.log("there is some internal server error", error);

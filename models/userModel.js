@@ -3,6 +3,8 @@ const validator = require('validator');
 const dotenv = require('dotenv');
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
+
 
 // CONFIG'S
 dotenv.config({ path: "../config/config.env" });
@@ -66,5 +68,16 @@ userSchema.methods.getJWTToken = function () {
         expiresIn: process.env.JWT_EXPIRE,
     });
 };
+
+userSchema.methods.getPasswordResetToken = function(){
+    // generating token using crypto
+    const resettoken = crypto.randomBytes(20).toString("hex");
+    // hashing the generated token using crypto
+    this.resetPasswordToken = crypto.createHash("sha256").update(resettoken).digest("hex");
+    
+    this.resetPasswordExpire = Date.now() + 15 * 60 * 1000;
+
+    return resettoken
+}
 
 module.exports = mongoose.model("Users", userSchema);

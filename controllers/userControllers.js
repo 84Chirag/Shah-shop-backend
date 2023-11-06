@@ -2,6 +2,7 @@ const Users = require('../models/userModel');
 const validator = require('validator');
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+// const sendEmail = require('../utils/forgotPasswordMail') //todo of forgot password
 
 
 // Register Or signup of user
@@ -133,3 +134,42 @@ exports.logout = async(req,res)=>{
         });
     }
 }
+
+// for forgot passwords (to do )
+/*
+exports.forgotpassword = async(req,res) => {
+    const user = await Users.findOne({email:req.body.email});
+    try {
+        if (!user) {
+            return res.status(404).json({
+                success:false,
+                message:"user does not Exit"
+            });
+        };
+        const resetToken = user.getPasswordResetToken();
+
+        await user.save({validateBeforeSave:false});
+        const resetPasswordUrl = `${req.protocol}://${req.get("host")}/api/v1/password/reset/${resetToken}`;
+        const message = `your password reset token is :- \n\n ${resetPasswordUrl} \n\nIf you have not requested this Email, please Ignore it.`
+        await sendEmail({
+            email: user.email,
+            subject: `Ecommerce Website Password Reset Email`,
+            message
+        });
+        res.status(200).json({
+            success:true,
+            Message:`Email has been sent to ${user.email} Succssfully`
+        })
+        
+    } catch (error) {
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpire = undefined;
+        user.save({validateBeforeSave: false});
+        console.log("there is some internal server error", error, error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error"
+        });
+    }
+}
+*/
