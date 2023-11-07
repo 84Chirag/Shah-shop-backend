@@ -50,13 +50,13 @@ exports.signupUser = async (req, res) => {
         });
 
         const options = {
-            expires : new Date(
+            expires: new Date(
                 Date.now() + process.env.COOKIE_EXPIRE * 24 * 60 * 60 * 1000
             ),
-            httpOnly : true,
+            httpOnly: true,
         };
         const token = user.getJWTToken();
-        return res.status(200).cookie("token",token,options).json({
+        return res.status(200).cookie("token", token, options).json({
             success: true,
             user,
             token
@@ -95,13 +95,13 @@ exports.loginUser = async (req, res) => {
             });
         };
         const options = {
-            expires : new Date(
+            expires: new Date(
                 Date.now() + process.env.COOKIE_EXPIRE * 24 * 60 * 60 * 1000
             ),
-            httpOnly : true,
+            httpOnly: true,
         };
         const token = user.getJWTToken();
-        return res.status(200).cookie("token",token,options).json({
+        return res.status(200).cookie("token", token, options).json({
             success: true,
             token
         })
@@ -116,15 +116,15 @@ exports.loginUser = async (req, res) => {
 
 
 // Logout of users
-exports.logout = async(req,res)=>{
+exports.logout = async (req, res) => {
     try {
-        res.cookie("token",null,{
-            expires:new Date(Date.now()),
-            httpOnly:true
+        res.cookie("token", null, {
+            expires: new Date(Date.now()),
+            httpOnly: true
         });
         return res.status(200).json({
-            success:true,
-            message:"You Have Been Successfully Logged Out!"
+            success: true,
+            message: "You Have Been Successfully Logged Out!"
         });
     } catch (error) {
         console.log("there is some internal server error", error, error.message);
@@ -173,3 +173,94 @@ exports.forgotpassword = async(req,res) => {
     }
 }
 */
+
+// user details
+exports.userdetail = async (req, res) => {
+    try {
+        const user = await Users.findById(req.user.id);
+        // console.log(user);
+        return res.status(200).json({
+            success: true,
+            user
+        })
+    } catch (error) {
+        console.log("there is some internal server error", error, error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error"
+        });
+    }
+}
+// update user profile
+exports.updateuser = async (req, res) => {
+    try {
+        const updatebody = {
+            name: req.body.name,
+            email: req.body.email,
+        }
+        // we are using req.user.id instead of req.body.id cause only login user can access this route 
+        // for further detail check adminAcess in middleware folder
+        const updateUser = await Users.findByIdAndUpdate(req.user.id, updatebody, {
+            new: true,
+            runValidators: true,
+            useFindAndModify: false
+        })
+
+        res.status(200).json({
+            success: true,
+        })
+    } catch (error) {
+        console.log("there is some internal server error", error.message);
+        if (error.name === "ValidationError") {
+            return res.status(400).json({
+                success: false,
+                message: `please enter valid ${error.message}`
+            })
+        }
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error"
+        });
+    }
+}
+
+// update user passwod
+exports.updatepassword = async (req, res) => {
+    try {
+        const user = await Users.findById(req.user.id).select("+password");
+
+        const comparepassword = await bcrypt.compare(req.body.oldpassword, user.password);
+        if (!comparepassword) {
+            return res.status(400).json({
+                success: false,
+                message: "Enter Valid Password"
+            });
+        };
+        if (req.body.newPassword !== req.body.confirmPassword) {
+            return res.status(400).json({
+                success: false,
+                message: "new and confirm password doees not match"
+            });
+        };
+        user.password = req.body.newPassword;
+        await user.save();
+        const token = user.getJWTToken();
+        res.status(200).json({
+            success: true,
+            user,
+            token
+        })
+    } catch (error) {
+        console.log("there is some internal server error", error);
+        if (error.name === "ValidationError") {
+            return res.status(400).json({
+                success: false,
+                message: `please enter valid ${error.message}`
+            })
+        }
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error"
+        });
+    }
+}
