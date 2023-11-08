@@ -114,7 +114,6 @@ exports.loginUser = async (req, res) => {
     }
 }
 
-
 // Logout of users
 exports.logout = async (req, res) => {
     try {
@@ -135,7 +134,7 @@ exports.logout = async (req, res) => {
     }
 }
 
-// for forgot passwords (to do )
+// for forgot passwords (to do)
 /*
 exports.forgotpassword = async(req,res) => {
     const user = await Users.findOne({email:req.body.email});
@@ -191,10 +190,12 @@ exports.userdetail = async (req, res) => {
         });
     }
 }
+
 // update user profile
 exports.updateuser = async (req, res) => {
     try {
         const updatebody = {
+            // to do of avatar or profile picture
             name: req.body.name,
             email: req.body.email,
         }
@@ -236,22 +237,112 @@ exports.updatepassword = async (req, res) => {
                 message: "Enter Valid Password"
             });
         };
-        if (req.body.newPassword !== req.body.confirmPassword) {
+        if (req.body.newpassword !== req.body.confirmpassword) {
             return res.status(400).json({
                 success: false,
                 message: "new and confirm password doees not match"
             });
         };
-        user.password = req.body.newPassword;
-        await user.save();
-        const token = user.getJWTToken();
+        // hasing new password before updating password in database
+        const newPassword = await bcrypt.hash(req.body.newpassword, 10);
+        await Users.findByIdAndUpdate(req.user.id,{password:newPassword})
+        const token = await user.getJWTToken();
         res.status(200).json({
             success: true,
             user,
             token
         })
     } catch (error) {
-        console.log("there is some internal server error", error);
+        console.log("there is some internal server error", error.message);
+        if (error.name === "ValidationError") {
+            return res.status(400).json({
+                success: false,
+                message: `please enter valid ${error}`
+            })
+        }
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error"
+        });
+    }
+}
+
+// All users detail -- admin route
+exports.allUsersProfile = async(req,res) => {
+    try {
+        const user = await Users.find();
+        res.status(200).json({
+            success:true,
+            user
+        })
+    } catch (error) {
+        console.log("there is some internal server error", error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error"
+        });
+    }
+}
+
+// one users detail -- admin route
+exports.oneUsersProfile = async(req,res) => {
+    try {
+        const user = await Users.findById(req.params.id);
+        if (!user) {
+            return res.status(200).json({
+                success:false,
+                message:"please Enter Valid User Id"
+            })
+        }
+        res.status(200).json({
+            success:true,
+            user
+        })
+    } catch (error) {
+        console.log("there is some internal server error", error.message);
+        if (error.name === "CastError") {
+            const message = `Resource not Found. Invalid: ${error.path}`;
+            return res.status(400).json({ message });
+        }
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error"
+        });
+    }
+}
+
+// update user profile
+exports.adminupdateuser = async (req, res) => {
+    try {
+        const updatebody = {
+            // to do of avatar or profile picture
+            name: req.body.name,
+            email: req.body.email,
+            role: req.body.role
+        }
+        const user = await Users.findById(req.params.id);
+        if (!user) {
+            return res.status(400).json({
+                success:false,
+                message:'please Enter valid id'
+            })
+        }
+        const updateUser = await Users.findByIdAndUpdate(req.params.id, updatebody, {
+            new: true,
+            runValidators: true,
+            useFindAndModify: false
+        })
+
+        res.status(200).json({
+            success: true,
+            updateUser
+        })
+    } catch (error) {
+        console.log("there is some internal server error", error.message);
+        if (error.name === "CastError") {
+            const message = `Resource not Found. Invalid: ${error.path}`;
+            return res.status(400).json({ message });
+        }
         if (error.name === "ValidationError") {
             return res.status(400).json({
                 success: false,

@@ -24,7 +24,7 @@ const userSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        required: [true, "please Enter Products price"],
+        required: [true, "please Enter a Password"],
         minLength: [8, "password should have more than 8 characters"],
         select: false
     },
@@ -69,15 +69,16 @@ userSchema.methods.getJWTToken = function () {
     });
 };
 
-userSchema.methods.getPasswordResetToken = function(){
-    // generating token using crypto
-    const resettoken = crypto.randomBytes(20).toString("hex");
-    // hashing the generated token using crypto
-    this.resetPasswordToken = crypto.createHash("sha256").update(resettoken).digest("hex");
+// comment out for now of resetpassword token
+// userSchema.methods.getPasswordResetToken = function(){
+//     // generating token using crypto
+//     const resettoken = crypto.randomBytes(20).toString("hex");
+//     // hashing the generated token using crypto
+//     this.resetPasswordToken = crypto.createHash("sha256").update(resettoken).digest("hex");
     
-    this.resetPasswordExpire = Date.now() + 15 * 60 * 1000;
+//     this.resetPasswordExpire = Date.now() + 15 * 60 * 1000;
 
-    return resettoken
-}
+//     return resettoken
+// }
 
 module.exports = mongoose.model("Users", userSchema);
