@@ -1,5 +1,3 @@
-// comment out for to do later
-/*
 const nodeMailer = require('nodemailer');
 const dotenv = require('dotenv');
 
@@ -7,18 +5,15 @@ dotenv.config({ path: "../config/config.env" });
 
 const sendEmail = async(options) => {
     const transporter = nodeMailer.createTransport({
+        service:process.env.SMTP_SERVICE,
+        host:"smtp.gmail.com",
         port: 465,
         secure:true,
-        logger:true,
-        debug:true,
-        secureConnecton:false,
-        service:process.env.SMTP_SERVICE,
+        // logger:true,
+        // debug:true,
         auth:{
             user:process.env.SMTP_EMAIL,
             pass:process.env.SMTP_PASSWORD
-        },
-        tls:{
-            rejectUnauthorized:false
         }
     });
 
@@ -32,4 +27,3 @@ const sendEmail = async(options) => {
 }
 
 module.exports = sendEmail;
-*/

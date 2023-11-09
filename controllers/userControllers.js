@@ -2,7 +2,8 @@ const Users = require('../models/userModel');
 const validator = require('validator');
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-// const sendEmail = require('../utils/forgotPasswordMail') //todo of forgot password
+const sendEmail = require('../utils/forgotPasswordMail');
+const crypto = require("crypto");
 
 
 // Register Or signup of user
@@ -134,8 +135,7 @@ exports.logout = async (req, res) => {
     }
 }
 
-// for forgot passwords (to do)
-/*
+// for forgot passwords 
 exports.forgotpassword = async(req,res) => {
     const user = await Users.findOne({email:req.body.email});
     try {
@@ -171,7 +171,63 @@ exports.forgotpassword = async(req,res) => {
         });
     }
 }
-*/
+
+// reset password
+exports.resetpassword = async(req,res) => {
+    try {
+        // hashing the generated token using crypto
+    const resetPasswordToken = crypto.createHash("sha256").update(req.params.token).digest("hex");
+        const user = await Users.findOne({
+            resetPasswordToken,
+            resetPasswordExpire:{$gt:Date.now()}
+        });
+        if (!user) {
+            return res.status(400).json({
+                success:false,
+                message:"Invalid Token Or Token Has Been Expired"
+            });
+        };
+        if (req.body.newpassword !== req.body.confirmpassword) {
+            return res.status(400).json({
+                success:false,
+                message:"New Password and Confirm Password Does Not Match"
+            });
+        };
+        user.password = req.body.newpassword;
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpire = undefined;
+
+        await user.save();
+        const token = await user.getJWTToken();
+        const options = {
+            expires: new Date(
+                Date.now() + process.env.COOKIE_EXPIRE * 24 * 60 * 60 * 1000
+            ),
+            httpOnly: true,
+        };
+
+        res.status(200).cookie("token", token, options).json({
+            success: true,
+            token
+        })
+    } catch (error) {
+        console.log("there is some internal server error", error.message);
+        if (error.name === "CastError") {
+            const message = `Resource not Found. Invalid: ${error.path}`;
+            return res.status(400).json({ message });
+        }
+        if (error.name === "ValidationError") {
+            return res.status(400).json({
+                success: false,
+                message: `please enter valid ${error.message}`
+            })
+        }
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error"
+        });
+    }
+}
 
 // user details
 exports.userdetail = async (req, res) => {
@@ -311,7 +367,7 @@ exports.oneUsersProfile = async(req,res) => {
     }
 }
 
-// update user profile
+// update user profile -- admin route
 exports.adminupdateuser = async (req, res) => {
     try {
         const updatebody = {
@@ -348,6 +404,35 @@ exports.adminupdateuser = async (req, res) => {
                 success: false,
                 message: `please enter valid ${error.message}`
             })
+        }
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error"
+        });
+    }
+}
+
+// delete user profile -- admin route
+exports.admindeleteuser = async (req,res) => {
+    try {
+        const userid = await Users.findById(req.params.id);
+        if (!userid) {
+            return res.status(400).json({
+                success:false,
+                message:"User Does not Exists"
+            });
+        };
+        const user = await Users.findByIdAndRemove(req.params.id);
+        res.status(200).json({
+            success:true,
+            message:"User has been successfully Deleted",
+            user
+        });
+    } catch (error) {
+        console.log("there is some internal server error", error.message);
+        if (error.name === "CastError") {
+            const message = `Resource not Found. Invalid: ${error.path}`;
+            return res.status(400).json({ message });
         }
         return res.status(500).json({
             success: false,

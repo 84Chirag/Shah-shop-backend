@@ -1,5 +1,5 @@
 const express = require('express');
-const { signupUser, loginUser, logout, forgotpassword, userdetail, updateuser, updatepassword, allUsersProfile, oneUsersProfile, adminupdateuser } = require('../controllers/userControllers');
+const { signupUser, loginUser, logout, forgotpassword, userdetail, updateuser, updatepassword, allUsersProfile, oneUsersProfile, adminupdateuser, resetpassword, admindeleteuser } = require('../controllers/userControllers');
 const { loginOnly, adminRole } = require('../middleware/adminAccess');
 const Router = express.Router();
 
@@ -13,7 +13,10 @@ Router.route('/login').post(loginUser);
 Router.route('/logout').get(logout);
 
 // route for forgot password
-// Router.route('/password/forgot').post(forgotpassword);
+Router.route('/password/forgot').post(forgotpassword);
+
+// route for password reset
+Router.route('/password/reset/:token').put(resetpassword);
 
 // route for user profile 
 Router.route('/profile').get(loginOnly, userdetail);
@@ -30,8 +33,11 @@ Router.route('/admin/allprofiles').get(loginOnly, adminRole("admin"), allUsersPr
 // route to access One user profile -- admin only
 Router.route('/admin/singleprofile/:id').get(loginOnly, adminRole("admin"), oneUsersProfile);
 
-// route to access One user profile -- admin only
+// route to update user profile -- admin only
 Router.route('/admin/update/userprofile/:id').put(loginOnly, adminRole("admin"), adminupdateuser);
+
+// route to delete user profile -- admin only
+Router.route('/admin/delete/:id').delete(loginOnly,adminRole("admin"),admindeleteuser);
 
 
 
