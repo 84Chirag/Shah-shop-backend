@@ -25,6 +25,8 @@ const products = require('./routes/productRoutes')
 app.use('/api/v1', products);
 const users = require('./routes/userRoutes')
 app.use('/api/v1', users);
+const orders = require('./routes/orderRoutes')
+app.use('/api/v1',orders);
 
 
 const server = app.listen(process.env.PORT, () => {

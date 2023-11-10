@@ -39,8 +39,4 @@ Router.route('/admin/update/userprofile/:id').put(loginOnly, adminRole("admin"),
 // route to delete user profile -- admin only
 Router.route('/admin/delete/:id').delete(loginOnly,adminRole("admin"),admindeleteuser);
 
-
-
-
-
 module.exports = Router;
