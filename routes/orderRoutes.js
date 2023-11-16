@@ -1,14 +1,17 @@
 const express = require('express');
 const Router = express.Router();
 const { loginOnly, adminRole } = require('../middleware/adminAccess');
-const { createOrder, allOrder, myOrder, singleOrder, updateOrder } = require('../controllers/orderController');
+const { createOrder, allOrder, myOrder, singleOrder, updateOrder, deleteOrder } = require('../controllers/orderController');
 
 
 // to get all orders -- admin route
-Router.route('/orders/allorder').get(loginOnly,adminRole("admin"),allOrder);
+Router.route('/admin/allorder').get(loginOnly,adminRole("admin"),allOrder);
 
-// to update order status -- admin route
-Router.route('/orders/updateorder/:id').put(loginOnly,adminRole("admin"),updateOrder);
+// to update order -- admin route
+Router.route('/admin/updateorder/:id').put(loginOnly,adminRole("admin"),updateOrder);
+
+// to delete order -- admin route
+Router.route('/admin/deleteorder/:id').delete(loginOnly,adminRole("admin"),deleteOrder);
 
 // to get my orders -- user route 
 Router.route('/order/:id').get(loginOnly,adminRole("admin"),singleOrder);

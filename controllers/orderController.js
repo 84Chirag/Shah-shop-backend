@@ -1,19 +1,25 @@
 const Product = require('../models/productsModel');
-const Users = require('../models/userModel');
 const Order = require('../models/orderModel');
-const mongoose = require('mongoose');
+// const Users = require('../models/userModel');
+// const mongoose = require('mongoose');
 
 
 // to check all orders -- admin route
 exports.allOrder = async (req, res) => {
     try {
-        const order = await Order.find();
+        const orders = await Order.find();
+        // to check total amount of all order
+        let totalAmount = 0;
+        orders.forEach(order => {
+            totalAmount += order.totalPrice
+        });
         return res.status(200).json({
             success: true,
-            order
-        })
+            totalAmount,
+            orders
+        });
     } catch (error) {
-        console.error("Error finding order:", error.message, error.path);
+        console.error("Error finding order:", error.message);
         return res.status(500).json({
             success: false,
             message: "Internal server error. Please try again later."
@@ -59,14 +65,14 @@ exports.createOrder = async (req, res) => {
             // Handle the specific cast error here
             return res.status(400).json({
                 success: false,
-                message: "Invalid data format for productId in orderItems."
+                message: "Invalid data format."
             });
         }
         if (error.name === "CastError") {
             // Handle the specific cast error here
             return res.status(400).json({
                 success: false,
-                message: "Invalid data format for productId in orderItems."
+                message: `Invalid Id format of Order Id or Error message: ${error.message}`
             });
         }
         // Mongoose might throw a MongoError with the code 11000 if there's a violation. You can handle this by checking if error.code === 11000.
@@ -77,7 +83,7 @@ exports.createOrder = async (req, res) => {
                 message: "Duplicate key error. A resource with the same key already exists."
             });
         }
-        console.error("Error creating order:", error.message, error.path);
+        console.error("Error creating order:", error.message);
         return res.status(500).json({
             success: false,
             message: "Internal server error. Please try again later."
@@ -105,7 +111,7 @@ exports.myOrder = async (req, res) => {
             // Handle the specific cast error here
             return res.status(400).json({
                 success: false,
-                message: `Invalid data format for productId in orderItems.`
+                message: `Invalid Id format of Order Id or Error message: ${error.message}`
             });
         }
         // Mongoose might throw a MongoError with the code 11000 if there's a violation. 
@@ -117,7 +123,7 @@ exports.myOrder = async (req, res) => {
                 message: "Duplicate key error. A resource with the same key already exists."
             });
         }
-        console.error("Error creating order:", error.message, error.path);
+        console.error("Error creating order:", error.message);
         return res.status(500).json({
             success: false,
             message: "Internal server error. Please try again later."
@@ -129,7 +135,7 @@ exports.myOrder = async (req, res) => {
 exports.singleOrder = async (req, res) => {
     try {
         // req.params.id is id of order i.e., _id
-        const order = await Order.findById(req.params.id).populate("user","name email")
+        const order = await Order.findById(req.params.id).populate("user", "name email")
         if (!order) {
             return res.status(404).json({
                 success: false,
@@ -145,7 +151,7 @@ exports.singleOrder = async (req, res) => {
             // Handle the specific cast error here
             return res.status(400).json({
                 success: false,
-                message: "Invalid data format for productId in orderItems."
+                message: `Invalid Id format of Order Id or Error message: ${error.message}`
             });
         }
         // Mongoose might throw a MongoError with the code 11000 if there's a violation. 
@@ -157,7 +163,7 @@ exports.singleOrder = async (req, res) => {
                 message: "Duplicate key error. A resource with the same key already exists."
             });
         }
-        console.error("Error creating order:", error.message, error.path);
+        console.error("Error creating order:", error.message);
         return res.status(500).json({
             success: false,
             message: "Internal server error. Please try again later."
@@ -176,28 +182,31 @@ exports.updateOrder = async (req, res) => {
                 message: "Order not found with this Id"
             });
         };
-        const { orderStatus, deliveredAt} = req.body;
-        if (!orderStatus || !deliveredAt) {
+        if (Order.orderStatus === "Delivered") {
             return res.status(400).json({
-                success:false,
-                message:"Please Enter Required Data"
+                success: false,
+                message: "order has been already Delivered"
             });
         };
-        const updatedorder = await Order.findByIdAndUpdate(req.params.id,{orderStatus,deliveredAt},{
-            new: true,
-            runValidators: true,
-            useFindAndModify: false
+        // update stock in products model on updation of status to delivered
+        order.orderItems.forEach(async (order) => {
+            await updateStock(order.productId, order.quantity)
         });
+        order.orderStatus = req.body.status;
+        if (req.body.status === "Delivered") {
+            order.deliveredAt = Date.now();
+        };
+        await order.save({ validateBeforeSave: false });
         res.status(200).json({
             success: true,
-            updatedorder
+            order
         })
     } catch (error) {
         if (error.name === "CastError") {
             // Handle the specific cast error here
             return res.status(400).json({
                 success: false,
-                message: "Invalid data format for productId in orderItems."
+                message: `Invalid Id format of Order Id or Error message: ${error.message}`
             });
         }
         // Mongoose might throw a MongoError with the code 11000 if there's a violation. 
@@ -209,7 +218,55 @@ exports.updateOrder = async (req, res) => {
                 message: "Duplicate key error. A resource with the same key already exists."
             });
         }
-        console.error("Error creating order:", error.message, error.path);
+        console.error("Error creating order:", error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error. Please try again later."
+        });
+    }
+}
+
+// this function is created to update product stock on order updation
+async function updateStock(id, quantity) {
+    const product = await Product.findById(id);
+
+    product.stock = product.stock - quantity;
+
+    await product.save({ validateBeforeSave: false });
+}
+
+// to delete order -- admin route
+exports.deleteOrder = async (req, res) => {
+    try {
+        const orderid = await Order.findById(req.params.id);
+        if (!orderid) {
+            return res.status(400).json({
+                success: false,
+                message: "order with this id does not exists"
+            });
+        };
+        const order = await Order.findByIdAndRemove(orderid);
+        return res.status(200).json({
+            success: true,
+        });
+    } catch (error) {
+        if (error.name === "CastError") {
+            // Handle the specific cast error here
+            return res.status(400).json({
+                success: false,
+                message: `Invalid Id format of Order Id or Error message: ${error.message}`
+            });
+        }
+        // Mongoose might throw a MongoError with the code 11000 if there's a violation. 
+        // You can handle this by checking if error.code === 11000.
+        if (error.code === 11000) {
+            // Handle unique constraint violation
+            return res.status(400).json({
+                success: false,
+                message: "Duplicate key error. A resource with the same key already exists."
+            });
+        }
+        console.error("Error finding order:", error.message);
         return res.status(500).json({
             success: false,
             message: "Internal server error. Please try again later."
