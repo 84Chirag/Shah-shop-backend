@@ -2,6 +2,7 @@ const Users = require('../models/userModel');
 const validator = require('validator');
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const cloudinary = require('cloudinary');
 const sendEmail = require('../utils/forgotPasswordMail');
 const crypto = require("crypto");
 
@@ -9,6 +10,11 @@ const crypto = require("crypto");
 // Register Or signup of user
 exports.signupUser = async (req, res) => {
     try {
+        const myCloud = await cloudinary.v2.uploader.upload(req.body.avatar,{
+            folder:"profile-avatar",
+            width:150,
+            crop:"scale"
+        });
         const { name, email, password } = req.body;
         // to get all data and handle error for missing data
         if (!name || !email || !password) {
@@ -45,8 +51,8 @@ exports.signupUser = async (req, res) => {
             email,
             password,
             avatar: {
-                public_id: "sample id",
-                url: "sample url"
+                public_id: myCloud.public_id,
+                url: myCloud.secure_url
             }
         });
 

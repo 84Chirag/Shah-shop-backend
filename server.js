@@ -1,9 +1,11 @@
 const express = require('express');
 const connecttodb = require('./database');
 const dotenv = require('dotenv');
-const cookieParser = require('cookie-parser')
+const cookieParser = require('cookie-parser');
+const bodyParser =require('body-parser');
+const cloudinary = require('cloudinary');
+const fileUpload = require('express-fileupload')
 const app = express();
-
 
 // handling uncaught exception error
 // if there's any uncaught error in server it will be handled here and 
@@ -16,6 +18,8 @@ process.on("uncaughtException", (error) => {
 
 app.use(express.json());
 app.use(cookieParser());
+app.use(bodyParser.urlencoded({extended:true}));
+app.use(fileUpload());
 
 // CONFIG'S
 dotenv.config({ path: "./config/config.env" });
@@ -25,7 +29,7 @@ const products = require('./routes/productRoutes')
 app.use('/api/v1', products);
 const users = require('./routes/userRoutes')
 app.use('/api/v1', users);
-const orders = require('./routes/orderRoutes')
+const orders = require('./routes/orderRoutes');
 app.use('/api/v1',orders);
 
 
@@ -47,3 +51,9 @@ process.on("unhandledRejection", (error) => {
 
 // connection to database
 connecttodb();
+
+cloudinary.config({ 
+  cloud_name: process.env.CLOUD_NAME, 
+  api_key: process.env.CLOUD_API_KEY, 
+  api_secret: process.env.CLOUD_API_SECRET
+});

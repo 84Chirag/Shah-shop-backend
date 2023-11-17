@@ -1,7 +1,7 @@
 // product model
 const Product = require('../models/productsModel');
 const ApiFeatures = require('../utils/apifeatures');
-let success = false;
+const cloudinary = require('cloudinary');
 
 
 // controller to check all products
@@ -11,9 +11,9 @@ exports.getallproducts = async (req, res) => {
         const productCount = await Product.countDocuments();
 
         const ApiFeature = new ApiFeatures(Product.find(), req.query)
-        .search()
-        .filter()
-        .pagination(resultPerPage);
+            .search()
+            .filter()
+            .pagination(resultPerPage);
         const product = await ApiFeature.query;
         return res.status(200).json({
             success: true,
@@ -54,6 +54,62 @@ exports.createproduct = async (req, res) => {
     try {
         // setting user as user id check productmodel for reference
         req.body.user = req.user.id
+
+        let images = [];
+        // checking the type of image i.e., is it a single image or a array of it's checking the type
+        // if it's single image push req.body.images to array of images 
+        // else req.body.images is already array which is equal to images
+        if (typeof req.body.images === "string") {
+            images.push(req.body.images);
+        } else {
+            images = req.body.images;
+        }
+
+        const imagesLinks = [];
+        // using for loop with condition of until i values is greater than length of images array
+        // it will upload images array to cloudinary
+        for (let i = 0; i < images.length; i++) {
+            const result = await cloudinary.v2.uploader.upload(images[i], {
+                folder: "products",
+            });
+            // and the link and id of images will be pushed in imagesLinks array
+            imagesLinks.push({
+                public_id: result.public_id,
+                url: result.secure_url,
+            });
+        }
+        // and after all that req.body.images will be same as imagesLinks array which contains image id and url
+        req.body.images = imagesLinks;
+
+        const productData = await req.body;
+        // validation check error handler
+        if (!productData.name || !productData.description || !productData.price || !productData.images || !productData.category) {
+            return res.status(400).json({
+                success: false,
+                message: "Please Provide Product's Full Deatils"
+            })
+        }
+        const product = await Product.create(productData);
+
+        return res.status(200).json({
+            success: true,
+            product
+        })
+    } catch (error) {
+        console.log("there is some internal server error", error);
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error"
+        });
+    }
+};
+
+// testing purpose without image cloudinary
+/*
+exports.createproduct = async (req, res) => {
+    try {
+        // setting user as user id check productmodel for reference
+        req.body.user = req.user.id
         const productData = await req.body;
         // validation check error handler
         if (!productData.name || !productData.description || !productData.price || !productData.image.public_id || !productData.image.url || !productData.category) {
@@ -76,6 +132,7 @@ exports.createproduct = async (req, res) => {
         });
     }
 };
+*/
 
 // controller to update a product -- only admin
 exports.updateproduct = async (req, res) => {
