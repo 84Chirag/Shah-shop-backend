@@ -40,7 +40,7 @@ npm install
 Set up your database configuration in config/database.js.
 
 Run the application:
-npm start
+node ./server.js
 
 The API will be accessible at http://localhost:3000.
 
