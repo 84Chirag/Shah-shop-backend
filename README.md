@@ -11,24 +11,25 @@ Table of Contents:
 6. Contributing
 
 Features : 
-• Product Management: Create, read, update, and delete products.
 
-• User Authentication: Secure endpoints using authentication.
+  • Product Management: Create, read, update, and delete products.
 
-• Order Processing: Manage customer orders and order history.
+  • User Authentication: Secure endpoints using authentication.
 
-• Category and Brand Handling: Organize products by category and brand.
+  • Order Processing: Manage customer orders and order history.
 
-• Cart Management: Allow users to add/remove items from their shopping cart.
+  • Category and Brand Handling: Organize products by category and brand.
 
-• Search and Filtering: Implement search functionality and filters for products.
+  • Cart Management: Allow users to add/remove items from their shopping cart.
 
-• Pagination: Retrieve a specific number of records per request.
+  • Search and Filtering: Implement search functionality and filters for products.
+
+  • Pagination: Retrieve a specific number of records per request.
 
 
 Installation
 Clone the repository:
-git clone https://github.com/your-username/Shop-API.git
+git clone https://github.com/84Chirag/Shop-API.git
 
 Navigate to the project directory:
 cd Shop-API
