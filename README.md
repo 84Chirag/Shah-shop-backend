@@ -2,7 +2,7 @@
 A REST API for Shops Created Using Node, Express JS and MongoDB
 Welcome to the Shop Node.js Express RESTful API! This API provides a robust backend solution for managing and interacting with a store's data. It is built using Node.js and Express, making it scalable, efficient, and easy to customize.
 
-Table of Contents
+Table of Contents:
 1. Features
 2. Installation
 3. Usage
