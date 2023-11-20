@@ -10,14 +10,14 @@ Table of Contents:
 5. Error Handling
 6. Contributing
 
-1. Features :
- 1. Product Management: Create, read, update, and delete products.
- 2. User Authentication: Secure endpoints using authentication.
- 3. Order Processing: Manage customer orders and order history.
- 4. Category and Brand Handling: Organize products by category and brand.
- 5. Cart Management: Allow users to add/remove items from their shopping cart.
- 6. Search and Filtering: Implement search functionality and filters for products.
- 7. Pagination: Retrieve a specific number of records per request.
+Features : 
+• Product Management: Create, read, update, and delete products.
+• User Authentication: Secure endpoints using authentication.
+• Order Processing: Manage customer orders and order history.
+• Category and Brand Handling: Organize products by category and brand.
+• Cart Management: Allow users to add/remove items from their shopping cart.
+• Search and Filtering: Implement search functionality and filters for products.
+• Pagination: Retrieve a specific number of records per request.
 
 
 Installation
