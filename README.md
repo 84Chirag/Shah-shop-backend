@@ -12,11 +12,17 @@ Table of Contents:
 
 Features : 
 • Product Management: Create, read, update, and delete products.
+
 • User Authentication: Secure endpoints using authentication.
+
 • Order Processing: Manage customer orders and order history.
+
 • Category and Brand Handling: Organize products by category and brand.
+
 • Cart Management: Allow users to add/remove items from their shopping cart.
+
 • Search and Filtering: Implement search functionality and filters for products.
+
 • Pagination: Retrieve a specific number of records per request.
 
 
