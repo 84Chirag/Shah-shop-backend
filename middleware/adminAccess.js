@@ -7,6 +7,7 @@ dotenv.config({ path: "../config/config.env" });
 
 exports.loginOnly = async (req, res, next) => {
     try {
+        res.header('Access-Control-Allow-Credentials', true);
         const {token} = req.cookies;
         // console.log(token)
 

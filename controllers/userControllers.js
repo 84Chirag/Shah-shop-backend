@@ -110,7 +110,8 @@ exports.loginUser = async (req, res) => {
         const token = user.getJWTToken();
         return res.status(200).cookie("token", token, options).json({
             success: true,
-            token
+            token,
+            options
         })
     } catch (error) {
         console.log("there is some internal server error", error, error.message);

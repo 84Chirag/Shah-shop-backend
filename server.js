@@ -17,11 +17,16 @@ process.on("uncaughtException", (error) => {
   process.exit(1);
 })
 
+const corsOptions = {
+  origin: 'http://localhost:5173',
+  credentials: true, // Enable credentials (cookies) in CORS
+};
+
 app.use(express.json());
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({extended:true}));
 app.use(fileUpload());
-app.use(cors());
+app.use(cors(corsOptions));
 
 // CONFIG'S
 dotenv.config({ path: "./config/config.env" });
