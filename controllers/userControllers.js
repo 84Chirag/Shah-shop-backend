@@ -66,7 +66,8 @@ exports.signupUser = async (req, res) => {
         return res.status(200).cookie("token", token, options).json({
             success: true,
             user,
-            token
+            token,
+            options
         });
     } catch (error) {
         console.log("there is some internal server error", error);
