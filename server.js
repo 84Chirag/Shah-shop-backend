@@ -18,7 +18,8 @@ process.on("uncaughtException", (error) => {
 })
 
 const corsOptions = {
-  origin: 'http://localhost:5173',
+  origin: ['https://jewellery-shop-gamma.vercel.app',],
+  // origin: ['http://localhost:5173','https://jewellery-shop-gamma.vercel.app/'],
   credentials: true, // Enable credentials (cookies) in CORS
 };
 
